@@ -52,12 +52,11 @@ pip install -r requirements.txt
 *Note: Ensure you have `streamlit`, `yfinance`, `pandas`, `pandas_ta_classic`, `finnhub-python`, `requests`, and `scipy` (or `numpy`) installed.*
 
 ### 4. Configuration
-Create a `config.py` file in the root directory to store your API keys:
+Create a `.env` file in the root directory to store your API keys:
 
-```python
-# config.py
-ALPHA_VANTAGE_API_KEY = "YOUR_ALPHA_VANTAGE_KEY"
-FINNHUB_API_KEY = "YOUR_FINNHUB_KEY"
+```ini
+ALPHA_VANTAGE_API_KEY=YOUR_ALPHA_VANTAGE_KEY
+FINNHUB_API_KEY=YOUR_FINNHUB_KEY
 ```
 
 ## 🖥️ Usage

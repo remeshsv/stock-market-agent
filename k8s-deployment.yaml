@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-agent
+  template:
+    metadata:
+      labels:
+        app: stock-agent
+    spec:
+      containers:
+      - name: stock-agent
+        image: __IMAGE_URL__
+        ports:
+        - containerPort: 8501
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: ALPHA_VANTAGE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stock-secrets
+              key: ALPHA_VANTAGE_API_KEY
+        - name: FINNHUB_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stock-secrets
+              key: FINNHUB_API_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock-agent-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: stock-agent
+  ports:
+  - port: 80
+    targetPort: 8501
