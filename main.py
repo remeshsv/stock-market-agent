@@ -1,5 +1,5 @@
 import argparse
-from analysis import get_stock_data, generate_suggestion, get_sentiment
+from analysis import get_stock_data, generate_suggestion, get_sentiment, get_company_news, calculate_news_sentiment, get_advanced_data, calculate_analyst_sentiment
 
 def main():
     """
@@ -14,24 +14,35 @@ def main():
     stock_data = get_stock_data(ticker)
 
     if stock_data is not None:
-        sentiment = get_sentiment(ticker)
-        suggestion = generate_suggestion(stock_data, sentiment)
-        print(f"Sentiment for {ticker}: {sentiment:.2f}")
+        sentiment, _ = get_sentiment(ticker)
+        
+        news = get_company_news(ticker)
+        news_score = calculate_news_sentiment(news)
+        
+        adv_data = get_advanced_data(ticker)
+        analyst_score = calculate_analyst_sentiment(adv_data.get('recommendations'))
+        
+        suggestion = generate_suggestion(stock_data, sentiment=sentiment, news_sentiment=news_score, analyst_sentiment=analyst_score)
+        print(f"Alpha Vantage Sentiment: {sentiment:.2f}")
+        print(f"News Sentiment: {news_score:.2f}")
+        print(f"Analyst Sentiment: {analyst_score:.2f}" if analyst_score is not None else "Analyst Sentiment: N/A")
         print(f"Suggestion for {ticker}: {suggestion}")
 
         if suggestion in ["Call", "Put"]:
             print("Finding a suitable contract...")
             from analysis import find_options_contracts
-            contract, expiration_date = find_options_contracts(ticker, suggestion)
-            if contract is not None:
-                print("\n--- Suggested Option Contract ---")
-                print(f"Symbol: {contract['contractSymbol']}")
-                print(f"Type: {suggestion}")
-                print(f"Expiration: {expiration_date}")
-                print(f"Strike Price: {contract['strike']}")
-                print(f"Last Price: {contract['lastPrice']}")
-                print(f"Implied Volatility: {contract['impliedVolatility']:.2%}")
-                print("---------------------------------")
+            contracts, expiration_date = find_options_contracts(ticker, suggestion, underlying_price=stock_data['Close'].iloc[-1])
+            
+            if contracts is not None and not contracts.empty:
+                print(f"\n--- Top 5 Suggested {suggestion} Options (Exp: {expiration_date}) ---")
+                for _, contract in contracts.iterrows():
+                    print(f"Symbol: {contract['contractSymbol']}")
+                    print(f"Strike: {contract['strike']} | Price: {contract['lastPrice']} | Breakeven: {contract['Breakeven']:.2f}")
+                    print(f"PoP: {contract['PoP']}")
+                    print(f"Risk: {contract['Risk Level']}")
+                    print(f"Reasoning: {contract['Reasoning']}")
+                    print(f"Vol/OI: {contract['volume']}/{contract['openInterest']}")
+                    print("---------------------------------")
             else:
                 print("Could not find a suitable options contract.")
 

@@ -1,4 +1,6 @@
 yfinance
 pandas
 pandas-ta-classic
-numpyFlask
+requests
+streamlit
+finnhub-python
