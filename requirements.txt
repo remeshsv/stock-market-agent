@@ -1,6 +1,7 @@
+streamlit
 yfinance
 pandas
-pandas-ta-classic
-requests
-streamlit
+pandas_ta_classic
 finnhub-python
+requests
+numpy
