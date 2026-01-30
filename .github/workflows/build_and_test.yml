@@ -21,15 +21,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Test Configuration (Secrets Check)
+    - name: Run Tests
       env:
         ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
         FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
       run: |
-        # Simple script to verify keys are injected correctly
-        python -c "import os; assert os.getenv('ALPHA_VANTAGE_API_KEY'), 'Alpha Vantage key not found'; assert os.getenv('FINNHUB_API_KEY'), 'Finnhub key not found'; print('Keys loaded successfully')"
+        pytest
 
   deploy:
     needs: build
@@ -54,10 +54,24 @@ jobs:
         push: true
         tags: ghcr.io/${{ github.repository_owner }}/stock-market-agent:latest
 
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+
     - name: Set up Kubeconfig
-      uses: azure/k8s-actions/aks-set-context@v1
+      uses: azure/k8s-set-context@v3
       with:
+        method: kubeconfig
         kubeconfig: ${{ secrets.KUBECONFIG }}
+
+    - name: Create Stock Secrets
+      env:
+        ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+        FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+      run: |
+        kubectl create secret generic stock-secrets \
+          --from-literal=ALPHA_VANTAGE_API_KEY="$ALPHA_VANTAGE_API_KEY" \
+          --from-literal=FINNHUB_API_KEY="$FINNHUB_API_KEY" \
+          --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Deploy to Kubernetes
       run: |
