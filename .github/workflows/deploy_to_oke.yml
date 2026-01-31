@@ -32,8 +32,6 @@ jobs:
 
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
-      with:
-        kubeconfig: '~/.kube/config'
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
@@ -74,3 +72,14 @@ jobs:
         # Replace placeholder in the deployment YAML
         sed -i "s|__IMAGE_URL__|ghcr.io/${{ github.repository_owner }}/stock-market-agent:latest|g" k8s-deployment.yaml
         kubectl apply -f k8s-deployment.yaml
+
+        # Patch deployment to use the registry secret to ensure image pull works
+        kubectl patch deployment stock-agent -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"regcred"}]}}}}'
+
+        # Wait for rollout to finish and print debug info if it fails
+        if ! kubectl rollout status deployment/stock-agent --timeout=120s; then
+          echo "Deployment failed to stabilize"
+          kubectl get pods
+          kubectl describe pods
+          exit 1
+        fi
