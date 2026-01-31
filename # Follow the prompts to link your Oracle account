@@ -1,6 +1,0 @@
-[DEFAULT]
-user=ocid1.user.oc1..aaaaaaaa6fr27wvymhfc4xquy2xhsgb3pshuzkbjthyz5dvdehii47ph7ygq
-fingerprint=4c:9f:82:92:13:ca:62:c0:9d:31:4f:66:56:b8:f0:ee
-key_file=/Volumes/Workspace/dev/stock-market-agent/keys/.oci/oracle-cloud-key.pem
-tenancy=ocid1.tenancy.oc1..aaaaaaaaioi7zxncmtgte5ipbnfiql6twtq3aj3u5o6hoi5adq7fqiz4rzvq
-region=us-ashburn-1
