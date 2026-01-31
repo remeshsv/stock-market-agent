@@ -12,6 +12,8 @@ spec:
       labels:
         app: stock-agent
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: stock-agent
         image: __IMAGE_URL__
@@ -35,11 +37,20 @@ spec:
             secretKeyRef:
               name: stock-secrets
               key: FINNHUB_API_KEY
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: stock-secrets
+              key: SENTRY_DSN
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: stock-agent-service
+  annotations:
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "100"
 spec:
   type: LoadBalancer
   selector:

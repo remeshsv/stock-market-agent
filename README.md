@@ -57,6 +57,7 @@ Create a `.env` file in the root directory to store your API keys:
 ```ini
 ALPHA_VANTAGE_API_KEY=YOUR_ALPHA_VANTAGE_KEY
 FINNHUB_API_KEY=YOUR_FINNHUB_KEY
+SENTRY_DSN=YOUR_SENTRY_DSN_OPTIONAL
 ```
 
 ## 🖥️ Usage
@@ -64,7 +65,7 @@ FINNHUB_API_KEY=YOUR_FINNHUB_KEY
 ### Running the Dashboard
 Launch the interactive web interface:
 ```bash
-streamlit run app.py
+streamlit run src/app.py
 ```
 Open your browser to `http://localhost:8501`.
 

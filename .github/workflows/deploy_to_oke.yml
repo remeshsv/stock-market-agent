@@ -1,44 +1,29 @@
-name: Build, Test, and Deploy Stock Agent
+name: Deploy to OKE
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.9"
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Run Tests
-      env:
-        ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
-        FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
-      run: |
-        pytest
-
   deploy:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+
+    - name: Login to OCI
+      uses: oracle-actions/login-oci@v1
+      with:
+        tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+        user: ${{ secrets.OCI_USER_OCID }}
+        fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+        key: ${{ secrets.OCI_API_KEY }}
+        region: ${{ secrets.OCI_REGION }}
+
+    - name: Configure Kubeconfig for OKE
+      uses: oracle-actions/configure-kubeconfig@v1
+      with:
+        cluster: ${{ secrets.OKE_CLUSTER_OCID }}
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
@@ -54,15 +39,6 @@ jobs:
         push: true
         tags: ghcr.io/${{ github.repository_owner }}/stock-market-agent:latest
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v3
-
-    - name: Set up Kubeconfig
-      uses: azure/k8s-set-context@v3
-      with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.KUBECONFIG }}
-
     - name: Create Stock Secrets
       env:
         ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
@@ -75,7 +51,7 @@ jobs:
           --from-literal=SENTRY_DSN="$SENTRY_DSN" \
           --dry-run=client -o yaml | kubectl apply -f -
 
-    - name: Create Image Pull Secret
+    - name: Create Image Pull Secret for GHCR
       run: |
         kubectl create secret docker-registry regcred \
           --docker-server=ghcr.io \
@@ -83,7 +59,7 @@ jobs:
           --docker-password=${{ secrets.GITHUB_TOKEN }} \
           --dry-run=client -o yaml | kubectl apply -f -
 
-    - name: Deploy to Kubernetes
+    - name: Deploy to OKE
       run: |
         # Replace placeholder in the deployment YAML
         sed -i "s|__IMAGE_URL__|ghcr.io/${{ github.repository_owner }}/stock-market-agent:latest|g" k8s-deployment.yaml

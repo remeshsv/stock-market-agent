@@ -2,7 +2,9 @@ streamlit
 yfinance
 pandas
 pandas_ta_classic
-finnhub-python
 requests
-numpy
 python-dotenv
+finnhub-python
+pytest
+numpy
+sentry-sdk
