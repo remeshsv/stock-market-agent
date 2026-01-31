@@ -27,7 +27,8 @@ jobs:
       uses: oracle-actions/run-oci-cli-command@v1.3.2
       id: create_kubeconfig
       with:
-        command: 'oci --debug ce cluster create-kubeconfig --cluster-id ${{ secrets.OKE_CLUSTER_OCID }} --file $HOME/.kube/config --region ${{ secrets.OCI_REGION }} --token-version 2.0.0'
+        command: 'oci --debug ce cluster create-kubeconfig --cluster-id ${{ secrets.OKE_CLUSTER_OCID }} --file $HOME/.kube/config --region ${{ secrets.OCI_REGION }}'
+        silent: false
 
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
