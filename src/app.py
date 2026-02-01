@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import datetime
-from analysis import get_stock_data, generate_suggestion, get_sentiment, find_options_contracts, get_company_news, calculate_news_sentiment, get_advanced_data, calculate_analyst_sentiment, run_backtest
+from src.analysis import get_stock_data, generate_suggestion, get_sentiment, find_options_contracts, get_company_news, calculate_news_sentiment, get_advanced_data, calculate_analyst_sentiment, run_backtest
 
 st.set_page_config(page_title="Stock Market Agent", layout="wide")
 st.title("📈 Stock Market Agent")
@@ -22,7 +22,7 @@ with st.sidebar:
     if page == "Live Analysis":
         st.header("Analyze New Ticker")
         new_ticker = st.text_input("Stock Ticker Symbol", "AAPL").upper()
-        max_option_cost = st.number_input("Max Option Cost ($)", min_value=1, value=20, step=5)
+        max_option_cost = st.number_input("Max Option Cost ($)", min_value=1, value=2000, step=5)
         st.button("Analyze Stock", type="primary", on_click=set_selected_ticker, args=(new_ticker,))
 
 if page == "Live Analysis":

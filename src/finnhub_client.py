@@ -1,5 +1,5 @@
 import finnhub
-import config
+import src.config as config
 
 def get_finnhub_client():
     """

@@ -2,14 +2,14 @@ import yfinance as yf
 import pandas as pd
 import pandas_ta_classic as ta
 import requests
-import config
+import src.config as config
 import streamlit as st
 import numpy as np
 import math
 
 from datetime import datetime, timedelta
 
-from finnhub_client import get_finnhub_client
+from src.finnhub_client import get_finnhub_client
 
 @st.cache_data
 def get_company_news(ticker):

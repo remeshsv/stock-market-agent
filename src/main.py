@@ -1,5 +1,5 @@
 import argparse
-from analysis import get_stock_data, generate_suggestion, get_sentiment, get_company_news, calculate_news_sentiment, get_advanced_data, calculate_analyst_sentiment
+from src.analysis import get_stock_data, generate_suggestion, get_sentiment, get_company_news, calculate_news_sentiment, get_advanced_data, calculate_analyst_sentiment
 
 def main():
     """
@@ -30,7 +30,7 @@ def main():
 
         if suggestion in ["Call", "Put"]:
             print("Finding a suitable contract...")
-            from analysis import find_options_contracts
+            from src.analysis import find_options_contracts
             contracts, expiration_date = find_options_contracts(ticker, suggestion, underlying_price=stock_data['Close'].iloc[-1])
             
             if contracts is not None and not contracts.empty:
